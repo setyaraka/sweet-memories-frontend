@@ -35,11 +35,16 @@ export default function App() {
 
   const activeIndex = ordered.findIndex((e) => e.id === activeId);
   const active: Email | undefined = activeIndex >= 0 ? ordered[activeIndex] : undefined;
+  const text = active?.content.replace(/\\n/g, "\n");
 
-  // ✅ Versi remote: data dikirim dari ComposerModal
   const addEmail = async (data: { title: string; content: string; category: Email["category"]; author?: string }) => {
-    const created = await create({ ...data, author: data.author ?? "Aku" });
-    setActiveId(created.id);   // opsional: langsung fokus ke surat baru
+    const escapedContent = data.content.replace(/\n/g, "\\n");
+    const created = await create({ 
+      ...data, 
+      content: escapedContent,
+      author: data.author ?? "Aku"
+    });
+    setActiveId(created.id);
     setOpenCompose(false);
   };
 
@@ -105,14 +110,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* {showList && (
-        <div className="fixed inset-0 z-50 sm:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowList(false)} aria-hidden="true" />
-          <div className="absolute inset-y-0 left-0 w-[88%] max-w-[360px] bg-white shadow-2xl p-3 overflow-y-auto">
-            
-          </div>
-        </div>
-      )} */}
       {showList && (
         <div className="fixed inset-0 z-50 sm:hidden">
           <div
@@ -203,7 +200,7 @@ export default function App() {
           <div>
             <div className="text-sm text-[#6B6157]">{new Date(active.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}</div>
             <h2 className="mt-1 text-xl font-semibold [text-wrap:balance]">{active.title}</h2>
-            <div className="mt-2 whitespace-pre-wrap leading-7 text-[clamp(16px,3.8vw,18px)] whitespace-pre-wrap">{active.content}</div>
+            <div className="mt-2 whitespace-pre-wrap leading-7 text-[clamp(16px,3.8vw,18px)] whitespace-pre-wrap">{text}</div>
             <div className="mt-4 flex justify-end gap-2">
               <button className="h-11 rounded-xl border border-[#ecd9cf] bg-white px-4 hover:bg-[#fff6f2]" onClick={() => setShowRandom(false)}>
                 Tutup

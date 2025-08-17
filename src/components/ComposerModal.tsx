@@ -6,7 +6,11 @@ import { btn } from "../lib/ui";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; content: string; category: Category }) => void;
+  onSubmit: (data: { 
+    title: string; 
+    content: string; 
+    category: Category 
+  }) => void;
 };
 
 export default function ComposerModal({ open, onClose, onSubmit }: Props) {
