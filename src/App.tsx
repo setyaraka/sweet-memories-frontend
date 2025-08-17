@@ -1,37 +1,30 @@
-import { useEffect, useMemo, useState } from "react";
-import { Email } from "./lib/types";
+import React, { useEffect, useMemo, useState } from "react";
+import type { Email } from "./lib/types"; // for Email["category"] typing
 import { PASS_PHRASE } from "./lib/constants";
-import { greet } from "./lib/dates";
-import { useEmails } from "./hooks/useEmails";
+import { fmt, greet } from "./lib/dates";
 import Timeline from "./components/Timeline";
 import Reader from "./components/Reader";
 import ComposerModal from "./components/ComposerModal";
 import Modal from "./components/Modal";
+import { useRemoteEmails } from "./hooks/useRemoteEmails";
 
 export default function App() {
   const [unlocked, setUnlocked] = useState<boolean>(!PASS_PHRASE);
-  const [emails, setEmails] = useEmails();
 
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState("");
   const [activeId, setActiveId] = useState<string | undefined>(undefined);
   const [showList, setShowList] = useState(false);
+  const [openCompose, setOpenCompose] = useState(false);
+  const [showRandom, setShowRandom] = useState(false);
+  const [activePos, setActivePos] = useState<number>(0);
 
-  const ordered = useMemo(() => {
-    const sorted = [...emails].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    return sorted
-      .filter((e) => !cat || e.category === (cat as Email["category"]))
-      .filter(
-        (e) =>
-          !query ||
-          e.title.toLowerCase().includes(query.toLowerCase()) ||
-          e.content.toLowerCase().includes(query.toLowerCase())
-      );
-  }, [emails, cat, query]);
+  // 👉 Ambil data dari API (bukan localStorage)
+  const { data: emails, create } = useRemoteEmails({ query, cat });
 
-  // Ensure activeId is valid with current filter
+  const ordered = useMemo(() => emails, [emails]);
+
+  // Pastikan activeId valid saat filter berubah
   useEffect(() => {
     if (!ordered.length) {
       setActiveId(undefined);
@@ -43,27 +36,11 @@ export default function App() {
   const activeIndex = ordered.findIndex((e) => e.id === activeId);
   const active: Email | undefined = activeIndex >= 0 ? ordered[activeIndex] : undefined;
 
-  const [openCompose, setOpenCompose] = useState(false);
-  const [showRandom, setShowRandom] = useState(false);
-
-  const addEmail = (data: { title: string; content: string; category: Email["category"] }) => {
-    const next: Email = {
-      id: crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
-      title: data.title,
-      content: data.content,
-      category: data.category,
-      created_at: new Date().toISOString(),
-      author: "Aku",
-    };
-    setEmails((prev: any) => [...prev, next]);
-    setActiveId(next.id);
-  };
-
-  const randomNote = () => {
-    if (!ordered.length) return;
-    const idx = Math.floor(Math.random() * ordered.length);
-    setActiveId(ordered[idx].id);
-    setShowRandom(true);
+  // ✅ Versi remote: data dikirim dari ComposerModal
+  const addEmail = async (data: { title: string; content: string; category: Email["category"]; author?: string }) => {
+    const created = await create({ ...data, author: data.author ?? "Aku" });
+    setActiveId(created.id);   // opsional: langsung fokus ke surat baru
+    setOpenCompose(false);
   };
 
   const onPrev = () => {
@@ -75,6 +52,14 @@ export default function App() {
     setActiveId(ordered[activeIndex + 1].id);
   };
 
+  const randomNote = () => {
+    if (!ordered.length) return;
+    const idx = Math.floor(Math.random() * ordered.length);
+    setActiveId(ordered[idx].id);
+    setShowRandom(true);
+  };
+
+  console.log(ordered, '>>> ORDERED')
   return (
     <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_20%_-10%,#fde7da,transparent_40%)] bg-[#F7F3EE] text-[#2A2A2A]">
       {(() => {
@@ -83,7 +68,6 @@ export default function App() {
       })()}
 
       <div className="mx-auto max-w-6xl p-6">
-        {/* Header desktop */}
         <header className="mb-4 hidden sm:flex items-center justify-between gap-3">
           <div>
             <div className="text-lg font-semibold tracking-wide">Museum Cinta Digital</div>
@@ -94,26 +78,12 @@ export default function App() {
           </div>
         </header>
 
-        {/* Header mobile */}
         <header className="mb-3 sm:hidden flex items-center justify-between">
-          <button
-            aria-label="Buka daftar surat"
-            onClick={() => setShowList(true)}
-            className="h-10 rounded-xl border border-[#ecd9cf] bg-white px-3 text-sm"
-          >
-            ☰ Daftar
-          </button>
+          <button aria-label="Buka daftar surat" onClick={() => setShowList(true)} className="h-10 rounded-xl border border-[#ecd9cf] bg-white px-3 text-sm">☰ Daftar</button>
           <div className="text-base font-semibold">Museum Cinta</div>
-          <button
-            aria-label="Tulis surat baru"
-            onClick={() => setOpenCompose(true)}
-            className="h-10 rounded-xl border border-[#ecd9cf] bg-white px-3 text-sm"
-          >
-            + Surat
-          </button>
+          <button aria-label="Tulis surat baru" onClick={() => setOpenCompose(true)} className="h-10 rounded-xl border border-[#ecd9cf] bg-white px-3 text-sm">+ Surat</button>
         </header>
 
-        {/* App Grid */}
         <div className="grid gap-6 sm:grid-cols-[360px_1fr]">
           <Timeline
             items={ordered}
@@ -135,14 +105,29 @@ export default function App() {
         </div>
       </div>
 
-      {/* Slide-over Timeline (mobile) */}
-      {showList && (
+      {/* {showList && (
         <div className="fixed inset-0 z-50 sm:hidden">
           <div className="absolute inset-0 bg-black/30" onClick={() => setShowList(false)} aria-hidden="true" />
           <div className="absolute inset-y-0 left-0 w-[88%] max-w-[360px] bg-white shadow-2xl p-3 overflow-y-auto">
+            
+          </div>
+        </div>
+      )} */}
+      {showList && (
+        <div className="fixed inset-0 z-50 sm:hidden">
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setShowList(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-y-0 left-0 w-[88%] max-w-[360px] bg-white shadow-2xl p-3 overflow-y-auto">
             <div className="mb-2 flex items-center justify-between">
               <div className="text-lg font-semibold">Timeline</div>
-              <button aria-label="Tutup daftar" className="text-sm rounded-lg border border-[#ecd9cf] px-2 py-1" onClick={() => setShowList(false)}>
+              <button
+                aria-label="Tutup daftar"
+                className="text-sm rounded-lg border border-[#ecd9cf] px-2 py-1"
+                onClick={() => setShowList(false)}
+              >
                 Tutup
               </button>
             </div>
@@ -166,51 +151,48 @@ export default function App() {
                   <option>Spesial</option>
                   <option>Random</option>
                 </select>
-                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs">▾</span>
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs">
+                  ▾
+                </span>
               </div>
             </div>
 
             <ul>
-              {ordered.map((e) => (
-                <li key={e.id} className="border-b border-[#f1e7df] px-2 py-3">
-                  <button
-                    className={`w-full text-left ${e.id === activeId ? "bg-[#fff6f2]" : "hover:bg-[#fff3ee]"}`}
-                    onClick={() => {
-                      setActiveId(e.id);
-                      setShowList(false);
-                    }}
-                  >
-                    <small className="block text-[#6B6157]">{new Date(e.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })} · {e.category}</small>
-                    <div className="truncate font-semibold">{e.title}</div>
-                    <div className="truncate text-[#413a33]/90">{e.content.split("\n")[0]}</div>
-                  </button>
+              
+              {ordered.map((row, pos) => (
+                <li
+                  key={row.id}
+                  className={`cursor-pointer border-b border-[#f1e7df] px-2 py-3 ${
+                    pos === activePos ? "bg-[#fff6f2]" : "hover:bg-[#fff3ee]"
+                  }`}
+                  onClick={() => {
+                    setActivePos(pos);
+                    setShowList(false);
+                  }}
+                >
+                  <small className="block text-[#6B6157]">
+                    {fmt(row.created_at)} · {row.category}
+                  </small>
+                  <div className="truncate font-semibold">{row.title}</div>
+                  <div className="truncate text-[#413a33]/90">
+                    {row.content.split("\n")[0]}
+                  </div>
                 </li>
               ))}
               {!ordered.length && (
-                <li className="px-2 py-6 text-sm text-[#6B6157]">Tidak ada surat. Coba ubah pencarian/kategori.</li>
+                <li className="px-2 py-6 text-sm text-[#6B6157]">
+                  Tidak ada surat. Coba ubah pencarian/kategori.
+                </li>
               )}
             </ul>
           </div>
         </div>
       )}
 
-      {/* Bottom Action Bar + Composer */}
       <div className="fixed inset-x-0 bottom-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:left-auto flex justify-center sm:justify-end p-3 sm:p-0 pb-[calc(env(safe-area-inset-bottom)+12px)]">
         <div className="flex gap-2 sm:flex-col">
-          <button
-            aria-label="Kejutkan aku"
-            className="h-11 rounded-xl border border-[#ecd9cf] bg-gradient-to-b from-[#fbe2da] to-[#f5d3c7] px-4 shadow-md"
-            onClick={randomNote}
-          >
-            🎲 Surprise Me
-          </button>
-          <button
-            aria-label="Tulis surat baru"
-            className="hidden sm:inline-block h-11 rounded-xl border border-[#ecd9cf] bg-white px-4 shadow-md hover:bg-[#fff6f2]"
-            onClick={() => setOpenCompose(true)}
-          >
-            + Surat
-          </button>
+          <button aria-label="Kejutkan aku" className="h-11 rounded-xl border border-[#ecd9cf] bg-gradient-to-b from-[#fbe2da] to-[#f5d3c7] px-4 shadow-md" onClick={randomNote}>🎲 Surprise Me</button>
+          <button aria-label="Tulis surat baru" className="hidden sm:inline-block h-11 rounded-xl border border-[#ecd9cf] bg-white px-4 shadow-md hover:bg-[#fff6f2]" onClick={() => setOpenCompose(true)}>+ Surat</button>
         </div>
       </div>
 
@@ -221,7 +203,7 @@ export default function App() {
           <div>
             <div className="text-sm text-[#6B6157]">{new Date(active.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}</div>
             <h2 className="mt-1 text-xl font-semibold [text-wrap:balance]">{active.title}</h2>
-            <div className="mt-2 whitespace-pre-wrap leading-7 text-[clamp(16px,3.8vw,18px)]">{active.content}</div>
+            <div className="mt-2 whitespace-pre-wrap leading-7 text-[clamp(16px,3.8vw,18px)] whitespace-pre-wrap">{active.content}</div>
             <div className="mt-4 flex justify-end gap-2">
               <button className="h-11 rounded-xl border border-[#ecd9cf] bg-white px-4 hover:bg-[#fff6f2]" onClick={() => setShowRandom(false)}>
                 Tutup

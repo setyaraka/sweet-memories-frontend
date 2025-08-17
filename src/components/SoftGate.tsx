@@ -37,6 +37,7 @@ export default function SoftGate({ unlocked, setUnlocked }: Props) {
             if (e.key === "Enter") {
               if (val && val === PASS_PHRASE) {
                 localStorage.setItem(STORAGE_KEYS.pass, "ok");
+                localStorage.setItem("mc_api_key", val); // <- enable API calls
                 setUnlocked(true);
               } else alert("Kata rahasia salah");
             }
@@ -48,6 +49,7 @@ export default function SoftGate({ unlocked, setUnlocked }: Props) {
             onClick={() => {
               if (val && val === PASS_PHRASE) {
                 localStorage.setItem(STORAGE_KEYS.pass, "ok");
+                localStorage.setItem("mc_api_key", val); // <- enable API calls
                 setUnlocked(true);
               } else alert("Kata rahasia salah");
             }}
