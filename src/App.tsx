@@ -19,12 +19,10 @@ export default function App() {
   const [showRandom, setShowRandom] = useState(false);
   const [activePos, setActivePos] = useState<number>(0);
 
-  // 👉 Ambil data dari API (bukan localStorage)
   const { data: emails, create } = useRemoteEmails({ query, cat });
 
   const ordered = useMemo(() => emails, [emails]);
 
-  // Pastikan activeId valid saat filter berubah
   useEffect(() => {
     if (!ordered.length) {
       setActiveId(undefined);
@@ -64,7 +62,6 @@ export default function App() {
     setShowRandom(true);
   };
 
-  console.log(ordered, '>>> ORDERED')
   return (
     <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_20%_-10%,#fde7da,transparent_40%)] bg-[#F7F3EE] text-[#2A2A2A]">
       {(() => {
@@ -155,27 +152,30 @@ export default function App() {
             </div>
 
             <ul>
-              
-              {ordered.map((row, pos) => (
-                <li
-                  key={row.id}
-                  className={`cursor-pointer border-b border-[#f1e7df] px-2 py-3 ${
-                    pos === activePos ? "bg-[#fff6f2]" : "hover:bg-[#fff3ee]"
-                  }`}
-                  onClick={() => {
-                    setActivePos(pos);
-                    setShowList(false);
-                  }}
-                >
-                  <small className="block text-[#6B6157]">
-                    {fmt(row.created_at)} · {row.category}
-                  </small>
-                  <div className="truncate font-semibold">{row.title}</div>
-                  <div className="truncate text-[#413a33]/90">
-                    {row.content.split("\n")[0]}
-                  </div>
-                </li>
-              ))}
+              {ordered.map((row, pos) => {
+                const text = row?.content.replace(/\\n/g, "\n");
+                return (
+                  <li
+                    key={row.id}
+                    className={`cursor-pointer border-b border-[#f1e7df] px-2 py-3 ${
+                      pos === activePos ? "bg-[#fff6f2]" : "hover:bg-[#fff3ee]"
+                    }`}
+                    onClick={() => {
+                      setActivePos(pos);
+                      setShowList(false);
+                      setActiveId(row.id);
+                    }}
+                  >
+                    <small className="block text-[#6B6157]">
+                      {fmt(row.created_at)} · {row.category}
+                    </small>
+                    <div className="truncate font-semibold">{row.title}</div>
+                    <div className="truncate text-[#413a33]/90">
+                      {text.split("\n")[0]}
+                    </div>
+                  </li>
+                )
+              })}
               {!ordered.length && (
                 <li className="px-2 py-6 text-sm text-[#6B6157]">
                   Tidak ada surat. Coba ubah pencarian/kategori.

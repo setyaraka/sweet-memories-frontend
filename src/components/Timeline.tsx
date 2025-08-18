@@ -40,21 +40,24 @@ export default function Timeline({ items, activeId, onSelect, query, onQuery, ca
         </div>
       </div>
       <ul className="max-h-[70vh] list-none overflow-auto p-0">
-        {items.map((e) => (
-          <li key={e.id} className="border-b border-[#f1e7df]">
-            <button
-              className={`w-full text-left px-4 py-3 hover:bg-[#fff3ee] ${
-                e.id === activeId ? "bg-[#fff6f2]" : ""
-              }`}
-              onClick={() => onSelect(e.id)}
-              aria-current={e.id === activeId ? "true" : undefined}
-            >
-              <small className="block text-[#6B6157]">{fmt(e.created_at)} · {e.category}</small>
-              <div className="truncate font-semibold">{e.title}</div>
-              <div className="truncate text-[#413a33]/90">{e.content.split("\n")[0]}</div>
-            </button>
-          </li>
-        ))}
+        {items.map((e) => {
+          const text = e?.content.replace(/\\n/g, "\n");
+          return (
+            <li key={e.id} className="border-b border-[#f1e7df]">
+              <button
+                className={`w-full text-left px-4 py-3 hover:bg-[#fff3ee] ${
+                  e.id === activeId ? "bg-[#fff6f2]" : ""
+                }`}
+                onClick={() => onSelect(e.id)}
+                aria-current={e.id === activeId ? "true" : undefined}
+              >
+                <small className="block text-[#6B6157]">{fmt(e.created_at)} · {e.category}</small>
+                <div className="truncate font-semibold">{e.title}</div>
+                <div className="truncate text-[#413a33]/90">{text.split("\n")[0]}</div>
+              </button>
+            </li>
+          )
+        }) }
         {!items.length && (
           <li className="px-4 py-6 text-sm text-[#6B6157]">Tidak ada surat. Coba ubah pencarian/kategori.</li>
         )}
