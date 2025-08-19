@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useTypewriter } from "../hooks/useTypeWritter";
 
-const MP3_SRC   = "/audio/song.mp3"; // ganti ke URL online jika perlu
-const START_AT  = 176;               // 2 menit 57 detik
-const LOOP_END  = 0;                 // set > START_AT untuk loop segmen, contoh 205
-const LOOP_ONLY_REFRAIN = false;     // true: loop hanya di [START_AT, LOOP_END)
+// const MP3_SRC   = "/audio/song.mp3"; // ganti ke URL online jika perlu
+// const START_AT  = 176;               // 2 menit 57 detik
+// const LOOP_END  = 0;                 // set > START_AT untuk loop segmen, contoh 205
+// const LOOP_ONLY_REFRAIN = false;     // true: loop hanya di [START_AT, LOOP_END)
+const MP3_SRC = "/audio/song.mp3";  // atau URL online
+const START_AT = 177;               // 2:57 (dalam detik)
+const END_AT   = 278;               // 4:38 (dalam detik)
+const LOOP_ONLY_REFRAIN = true;     // true = loop hanya reff [START_AT, END_AT)
 
 export default function BirthdayIntro() {
   const [open, setOpen] = useState(true);
@@ -13,23 +17,64 @@ export default function BirthdayIntro() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // init audio sekali
-  useEffect(() => {
+//   useEffect(() => {
+//     const el = new Audio(MP3_SRC);
+//     el.preload = "auto";
+//     el.loop = !LOOP_ONLY_REFRAIN; // kalau loop refrain, kita loop manual
+//     el.volume = 0.25;
+//     // loop hanya segmen reff (opsional)
+//     const onTimeUpdate = () => {
+//       if (LOOP_ONLY_REFRAIN && LOOP_END > START_AT && el.currentTime >= LOOP_END) {
+//         el.currentTime = START_AT; // balik ke awal reff
+//         // el.play(); // biasanya tetap jalan tanpa perlu dipanggil lagi
+//       }
+//     };
+//     el.addEventListener("timeupdate", onTimeUpdate);
+//     audioRef.current = el;
+
+//     return () => {
+//       el.removeEventListener("timeupdate", onTimeUpdate);
+//       el.pause();
+//     };
+//   }, []);
+useEffect(() => {
     const el = new Audio(MP3_SRC);
     el.preload = "auto";
-    el.loop = !LOOP_ONLY_REFRAIN; // kalau loop refrain, kita loop manual
+    el.loop = !LOOP_ONLY_REFRAIN; // kalau kita loop segmen manual, jangan pakai loop bawaan
     el.volume = 0.25;
-    // loop hanya segmen reff (opsional)
+  
+    // iOS/Safari kadang baru mengizinkan seek setelah metadata siap:
+    const onLoadedMeta = () => { try { el.currentTime = START_AT; } catch {} };
+  
+    // loop/stop di batas END_AT
     const onTimeUpdate = () => {
-      if (LOOP_ONLY_REFRAIN && LOOP_END > START_AT && el.currentTime >= LOOP_END) {
-        el.currentTime = START_AT; // balik ke awal reff
-        // el.play(); // biasanya tetap jalan tanpa perlu dipanggil lagi
+      if (el.currentTime >= END_AT) {
+        if (LOOP_ONLY_REFRAIN) {
+          el.currentTime = START_AT; // ulang dari awal reff
+          // el.play(); // biasanya play lanjut otomatis
+        } else {
+          el.pause(); // kalau tidak loop, berhenti di 4:38
+        }
       }
     };
+  
+    // jaga-jaga: kalau mulai play bukan dari reff, paksa seek ke START_AT
+    const onPlay = () => {
+      if (el.currentTime < START_AT || el.currentTime > END_AT) {
+        try { el.currentTime = START_AT; } catch {}
+      }
+    };
+  
+    el.addEventListener("loadedmetadata", onLoadedMeta);
     el.addEventListener("timeupdate", onTimeUpdate);
+    el.addEventListener("play", onPlay);
+  
     audioRef.current = el;
-
+  
     return () => {
+      el.removeEventListener("loadedmetadata", onLoadedMeta);
       el.removeEventListener("timeupdate", onTimeUpdate);
+      el.removeEventListener("play", onPlay);
       el.pause();
     };
   }, []);
@@ -55,11 +100,11 @@ export default function BirthdayIntro() {
     if (!el) return;
     if (checked) {
       try {
-        el.currentTime = START_AT;   // mulai dari 2:57
-        await el.play();
+        // pastikan mulai di reff
+        if (el.readyState >= 1) el.currentTime = START_AT; // HAVE_METADATA
+        await el.play(); // harus dipanggil dari event user (klik/cek)
       } catch (e) {
-        // kalau autoplay masih diblok, klik tombol "Buka Museum" juga akan memanggil play lagi
-        // console.warn(e);
+        // autoplay bisa diblok; tombol "Buka Museum" akan coba lagi
       }
     } else {
       el.pause();
@@ -70,15 +115,13 @@ export default function BirthdayIntro() {
   const closeIntro = async () => {
     if (musicOn && audioRef.current) {
       try {
-        // jaga-jaga selalu start di reff
-        audioRef.current.currentTime = START_AT;
+        if (audioRef.current.readyState >= 1) audioRef.current.currentTime = START_AT;
         await audioRef.current.play();
       } catch {}
     }
-    onToggleMusic(false);
+    onToggleMusic(true);
     setOpen(false);
   };
-
   // kunci scroll halaman saat modal terbuka (nyaman di mobile)
   useEffect(() => {
     if (!open) return;
@@ -126,7 +169,7 @@ export default function BirthdayIntro() {
           </p>
 
           {/* Toggle musik lembut */}
-          <div className="mt-4 flex items-center gap-3">
+          {/* <div className="mt-4 flex items-center gap-3">
             <input
               id="soft-music"
               type="checkbox"
@@ -137,7 +180,7 @@ export default function BirthdayIntro() {
             <label htmlFor="soft-music" className="text-sm text-[#2B2B2B]">
                 Baca sambil dengar alunan hangat
             </label>
-          </div>
+          </div> */}
 
           <div className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
