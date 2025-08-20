@@ -8,8 +8,8 @@ export const fmt = (iso: string) =>
   
 export const greet = () => {
     const h = new Date().getHours();
-    if (h < 11) return "Selamat pagi, Sayang ❤️";
-    if (h < 16) return "Selamat siang, Sayang ❤️";
-    if (h < 19) return "Selamat sore, Sayang ❤️";
-    return "Selamat malam, Sayang ❤️";
+    if (h < 11) return "Selamat pagi, Aya Sayang ❤️";
+    if (h < 16) return "Selamat siang, Aya Sayang ❤️";
+    if (h < 19) return "Selamat sore, Aya Sayang ❤️";
+    return "Selamat malam, Aya Sayang ❤️";
 };

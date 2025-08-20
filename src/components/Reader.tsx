@@ -50,7 +50,7 @@ export default function Reader({ email, onPrev, onNext, atStart, atEnd }: Props)
             <div>
               <div className="text-sm text-[#6B6157]">—</div>
               <h1 className="mb-2 font-serif text-[clamp(22px,5.5vw,26px)] font-semibold tracking-tight text-[#A45D5D] [text-wrap:balance]">
-                Selamat datang, Sayang ❤️
+                Selamat datang, Aya Sayang ❤️
               </h1>
               <p className="text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8 text-[#3E3A36]">
                 Pilih satu surat di sebelah kiri untuk membacanya. Atau, kalau mau, tekan Surprise Me untuk kejutan kata manis dariku.

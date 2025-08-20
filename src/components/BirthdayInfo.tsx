@@ -20,7 +20,7 @@ export default function BirthdayIntro() {
     return () => mq.removeEventListener?.("change", onChange);
   }, []);
 
-  const message = "Selamat ulang tahun, sayang. Hari ini aku buka Museum Cinta kita. Pelan-pelan ya, satu halaman, satu senyum.";
+  const message = "Selamat ulang tahun, Aya sayang. Hari ini aku buka Museum Cinta kita. Pelan-pelan ya, satu halaman, satu senyum.";
   const typed = useTypewriter(message, open && !prefersReduced, 45);
 
   useEffect(() => {
