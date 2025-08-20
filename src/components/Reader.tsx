@@ -1,6 +1,9 @@
 import { Email } from "../lib/types";
 import { fmt } from "../lib/dates";
 import { btn } from "../lib/ui";
+import { JSX } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, HeartHandshake, MessageCircleHeart, PartyPopper, Sunrise } from "lucide-react";
 
 type Props = {
   email?: Email;
@@ -10,35 +13,107 @@ type Props = {
   atEnd: boolean;
 };
 
+const categoryMeta: Record<
+  string,
+  { tint: string; ring: string; gradient: string; icon: string; label: string }
+> = {
+  pagi:    { tint: "text-[#A45D5D]", ring: "ring-[#A45D5D]/25", gradient: "from-[#FFF8F1] to-[#FFF3ED]", icon: "🌅", label: "Pagi" },
+  dukungan:{ tint: "text-[#A3B18A]", ring: "ring-[#A3B18A]/25", gradient: "from-[#FAFFF7] to-[#F7FFF9]", icon: "💪", label: "Dukungan" },
+  spesial: { tint: "text-[#A45D5D]", ring: "ring-[#A45D5D]/25", gradient: "from-[#FFF1F5] to-[#FFF7FA]", icon: "🎉", label: "Spesial" },
+  random:  { tint: "text-[#6B6157]", ring: "ring-[#6B6157]/20", gradient: "from-[#FFFDF8] to-[#FFF8F1]", icon: "💌", label: "Random" },
+};
+
+const categoryIcon: Record<string, JSX.Element> = {
+  Pagi:       <Sunrise className="h-4 w-4" aria-hidden />,
+  Dukungan:   <HeartHandshake className="h-4 w-4" aria-hidden />,
+  Spesial:    <PartyPopper className="h-4 w-4" aria-hidden />,
+  Random:     <MessageCircleHeart className="h-4 w-4" aria-hidden />,
+};
+
 export default function Reader({ email, onPrev, onNext, atStart, atEnd }: Props) {
-  const text = email?.content.replace(/\\n/g, "\n");
+  const text = email?.content.replace(/\\n/g, "\n") ?? "";
+  const catKey = (email as Email)?.category?.toLowerCase?.() ?? "random";
+  const meta = categoryMeta[catKey] ?? categoryMeta.random;
+
   return (
     <main className="p-1 order-1 sm:order-none">
-      <article className="rounded-2xl bg-[#FFF8F1] p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-        {!email ? (
-          <div>
-            <div className="text-sm text-[#6B6157]">—</div>
-            <h1 className="mb-2 text-[clamp(20px,5.5vw,24px)] font-semibold [text-wrap:balance]">Selamat datang, Sayang ❤️</h1>
-            <div className="whitespace-pre-wrap text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8">
-              Pilih salah satu surat di sisi kiri untuk membacanya. Atau tekan tombol “Surprise Me” untuk kejutan manis.
+      <AnimatePresence mode="wait">
+        <motion.article
+          key={email?.id ?? "welcome"}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className={[
+            "rounded-2xl p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]",
+            "bg-gradient-to-br", meta.gradient, "ring-1", meta.ring,
+          ].join(" ")}
+        >
+          {!email ? (
+            <div>
+              <div className="text-sm text-[#6B6157]">—</div>
+              <h1 className="mb-2 font-serif text-[clamp(22px,5.5vw,26px)] font-semibold tracking-tight text-[#A45D5D] [text-wrap:balance]">
+                Selamat datang, Sayang ❤️
+              </h1>
+              <p className="text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8 text-[#3E3A36]">
+                Pilih salah satu surat di sisi kiri untuk membacanya. Atau tekan tombol
+                <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-white/70 ring-1 ring-black/5">
+                  ✨ Surprise Me
+                </span>
+                untuk kejutan manis yang aku tulis khusus buat kamu.
+              </p>
             </div>
-          </div>
-        ) : (
-          <div>
-            <div className="text-sm text-[#6B6157]">{fmt(email.created_at)}</div>
-            <h1 className="mb-2 text-[clamp(20px,5.5vw,24px)] font-semibold [text-wrap:balance]">{email.title}</h1>
-            <div className="whitespace-pre-wrap text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8">{text}</div>
-            <div className="mt-4 flex justify-between gap-2">
-              <button className={`${btn.base} ${btn.ghost}`} onClick={onPrev} disabled={atStart} aria-label="Surat sebelumnya">
-                Sebelumnya
-              </button>
-              <button className={`${btn.base} ${btn.ghost}`} onClick={onNext} disabled={atEnd} aria-label="Surat berikutnya">
-                Berikutnya
-              </button>
+          ) : (
+            <div>
+              <div className="flex items-center gap-2 text-sm text-[#6B6157]">
+                <span>{fmt(email.created_at)}</span>
+                <span aria-hidden>•</span>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/70 ring-1 ${meta.ring}`}>
+                  <span>{categoryIcon[email.category]}</span>
+                  <span className="sr-only">Kategori: </span>
+                  <span className="capitalize">{meta.label}</span>
+                </span>
+              </div>
+
+              <h1 className={`mb-2 font-serif text-[clamp(22px,5.5vw,26px)] font-semibold [text-wrap:balance] ${meta.tint}`}>
+                {email.title}
+              </h1>
+
+              <div className="text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8 text-[#3E3A36] whitespace-pre-wrap">
+                {text}
+              </div>
+
+              <div className="my-4 h-px bg-gradient-to-r from-transparent via-[#A45D5D]/30 to-transparent" />
+
+              <div className="mt-2 flex justify-between gap-2">
+                <button
+                  className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
+                  onClick={onPrev}
+                  disabled={atStart}
+                  aria-label="Buka surat sebelumnya"
+                  title="Sebelumnya"
+                >
+                  <ArrowLeft className="h-5 w-5" aria-hidden />
+                  <span className="hidden sm:inline">Sebelumnya</span>
+                  <span className="sm:hidden">Sebelum</span>
+                </button>
+
+                <button
+                  className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
+                  onClick={onNext}
+                  disabled={atEnd}
+                  aria-label="Buka surat berikutnya"
+                  title="Berikutnya"
+                >
+                  <span className="hidden lg:inline">Surat Berikutnya</span>
+                  <span className="lg:hidden">Lanjut</span>
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </article>
+          )}
+        </motion.article>
+      </AnimatePresence>
     </main>
   );
 }
