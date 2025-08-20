@@ -8,7 +8,8 @@ import ComposerModal from "./components/ComposerModal";
 import Modal from "./components/Modal";
 import { useRemoteEmails } from "./hooks/useRemoteEmails";
 import BirthdayIntro from "./components/BirthdayInfo";
-import { Dices, MessageCirclePlus } from "lucide-react";
+import { AudioProvider } from "./audio/AudioProvider";
+import FloatingActions from "./components/FloatingActions";
 
 export default function App() {
   const [unlocked, setUnlocked] = useState<boolean>(!PASS_PHRASE);
@@ -64,7 +65,7 @@ export default function App() {
     setShowRandom(true);
   };
   return (
-    <>
+    <AudioProvider initialSrc="/audio/song.mp3" initialVolume={0.25}>
       <BirthdayIntro/>
       <div className="min-h-screen bg-[radial-gradient(1200px_600px_at_20%_-10%,#fde7da,transparent_40%)] bg-[#F7F3EE] text-[#2A2A2A]">
         {(() => {
@@ -180,7 +181,7 @@ export default function App() {
                 })}
                 {!ordered.length && (
                   <li className="px-2 py-6 text-sm text-[#6B6157]">
-                    Tidak ada surat. Coba ubah pencarian/kategori.
+                    Belum ada surat di sini, Sayang. Coba pilih kategori lain atau tekan tombol Surprise Me untuk dapat kejutan manis dariku.
                   </li>
                 )}
               </ul>
@@ -188,26 +189,7 @@ export default function App() {
           </div>
         )}
 
-        <div className="fixed inset-x-0 bottom-0 sm:inset-auto sm:bottom-6 sm:right-6 sm:left-auto flex justify-center sm:justify-end p-3 sm:p-0 pb-[calc(env(safe-area-inset-bottom)+12px)]">
-          <div className="flex gap-2 sm:flex-col">
-            <button
-              className="group inline-flex items-center gap-2 rounded-xl px-4 py-2 shadow-md bg-white/80 ring-1 ring-black/5 hover:ring-rose-300 hover:bg-white transition"
-              onClick={randomNote}
-              aria-label="Beri aku kejutan manis"
-            >
-              <Dices className="h-5 w-5 group-hover:rotate-12 group-hover:scale-110 transition" aria-hidden />
-              <span className="font-medium">Surprise Me</span>
-            </button>
-            <button 
-              aria-label="Tulis surat baru" 
-              className="hidden group sm:inline-flex items-center gap-2 rounded-xl px-4 py-2 shadow-md bg-white/80 ring-1 ring-black/5 hover:ring-rose-300 hover:bg-white transition"
-              onClick={() => setOpenCompose(true)}>
-                <MessageCirclePlus className="h-5 w-5 group-hover:rotate-12 group-hover:scale-110 transition" aria-hidden />
-                <span className="font-medium">Surat</span>
-            </button>
-          </div>
-        </div>
-
+        <FloatingActions onSurprise={randomNote} onCompose={() => setOpenCompose(true)} />
         <ComposerModal open={openCompose} onClose={() => setOpenCompose(false)} onSubmit={addEmail} />
         <Modal 
           open={showRandom} 
@@ -258,6 +240,6 @@ export default function App() {
         )}
       </Modal>
       </div>
-    </>
+    </AudioProvider>
   );
 }

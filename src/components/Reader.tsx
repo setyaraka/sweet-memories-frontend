@@ -31,8 +31,7 @@ export default function Reader({ email, onPrev, onNext, atStart, atEnd }: Props)
   const text = email?.content.replace(/\\n/g, "\n") ?? "";
   const catKey = (email as Email)?.category?.toLowerCase?.() ?? "random";
   const meta = categoryMeta[catKey] ?? categoryMeta.random;
-console.log(atStart, '>>> START')
-console.log(atEnd, ">>>> END")
+
   return (
     <main className="p-1 order-1 sm:order-none">
       <AnimatePresence mode="wait">
@@ -54,11 +53,7 @@ console.log(atEnd, ">>>> END")
                 Selamat datang, Sayang ❤️
               </h1>
               <p className="text-[clamp(16px,3.8vw,18px)] leading-7 sm:leading-8 text-[#3E3A36]">
-                Pilih salah satu surat di sisi kiri untuk membacanya. Atau tekan tombol
-                <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full bg-white/70 ring-1 ring-black/5">
-                  ✨ Surprise Me
-                </span>
-                untuk kejutan manis yang aku tulis khusus buat kamu.
+                Pilih satu surat di sebelah kiri untuk membacanya. Atau, kalau mau, tekan Surprise Me untuk kejutan kata manis dariku.
               </p>
             </div>
           ) : (

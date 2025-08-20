@@ -59,7 +59,7 @@ export default function Timeline({ items, activeId, onSelect, query, onQuery, ca
           )
         }) }
         {!items.length && (
-          <li className="px-4 py-6 text-sm text-[#6B6157]">Tidak ada surat. Coba ubah pencarian/kategori.</li>
+          <li className="px-4 py-6 text-sm text-[#6B6157]">Belum ada surat di sini, Sayang. Coba pilih kategori lain atau tekan tombol Surprise Me untuk dapat kejutan manis dariku.</li>
         )}
       </ul>
     </aside>
