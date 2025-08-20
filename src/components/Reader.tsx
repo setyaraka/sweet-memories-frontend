@@ -13,10 +13,7 @@ type Props = {
   atEnd: boolean;
 };
 
-const categoryMeta: Record<
-  string,
-  { tint: string; ring: string; gradient: string; icon: string; label: string }
-> = {
+const categoryMeta: Record<string, { tint: string; ring: string; gradient: string; icon: string; label: string }> = {
   pagi:    { tint: "text-[#A45D5D]", ring: "ring-[#A45D5D]/25", gradient: "from-[#FFF8F1] to-[#FFF3ED]", icon: "🌅", label: "Pagi" },
   dukungan:{ tint: "text-[#A3B18A]", ring: "ring-[#A3B18A]/25", gradient: "from-[#FAFFF7] to-[#F7FFF9]", icon: "💪", label: "Dukungan" },
   spesial: { tint: "text-[#A45D5D]", ring: "ring-[#A45D5D]/25", gradient: "from-[#FFF1F5] to-[#FFF7FA]", icon: "🎉", label: "Spesial" },
@@ -34,7 +31,8 @@ export default function Reader({ email, onPrev, onNext, atStart, atEnd }: Props)
   const text = email?.content.replace(/\\n/g, "\n") ?? "";
   const catKey = (email as Email)?.category?.toLowerCase?.() ?? "random";
   const meta = categoryMeta[catKey] ?? categoryMeta.random;
-
+console.log(atStart, '>>> START')
+console.log(atEnd, ">>>> END")
   return (
     <main className="p-1 order-1 sm:order-none">
       <AnimatePresence mode="wait">
@@ -85,30 +83,33 @@ export default function Reader({ email, onPrev, onNext, atStart, atEnd }: Props)
 
               <div className="my-4 h-px bg-gradient-to-r from-transparent via-[#A45D5D]/30 to-transparent" />
 
-              <div className="mt-2 flex justify-between gap-2">
-                <button
-                  className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
-                  onClick={onPrev}
-                  disabled={atStart}
-                  aria-label="Buka surat sebelumnya"
-                  title="Sebelumnya"
-                >
-                  <ArrowLeft className="h-5 w-5" aria-hidden />
-                  <span className="hidden sm:inline">Sebelumnya</span>
-                  <span className="sm:hidden">Sebelum</span>
-                </button>
-
-                <button
-                  className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
-                  onClick={onNext}
-                  disabled={atEnd}
-                  aria-label="Buka surat berikutnya"
-                  title="Berikutnya"
-                >
-                  <span className="hidden lg:inline">Surat Berikutnya</span>
-                  <span className="lg:hidden">Lanjut</span>
-                  <ArrowRight className="h-5 w-5" aria-hidden />
-                </button>
+              <div className={`mt-2 flex gap-2 ${!atStart ? 'justify-between' : 'justify-end'}`}>
+                {!atStart && 
+                  <button
+                    className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
+                    onClick={onPrev}
+                    disabled={atStart}
+                    aria-label="Buka surat sebelumnya"
+                    title="Sebelumnya"
+                  >
+                    <ArrowLeft className="h-5 w-5" aria-hidden />
+                    <span className="hidden sm:inline">Sebelumnya</span>
+                    <span className="sm:hidden">Sebelum</span>
+                  </button>
+                }
+                {!atEnd &&
+                  <button
+                    className={`${btn.base} ${btn.ghost} flex items-center gap-2`}
+                    onClick={onNext}
+                    disabled={atEnd}
+                    aria-label="Buka surat berikutnya"
+                    title="Berikutnya"
+                  >
+                    <span className="hidden lg:inline">Surat Berikutnya</span>
+                    <span className="lg:hidden">Lanjut</span>
+                    <ArrowRight className="h-5 w-5" aria-hidden />
+                  </button>
+                }
               </div>
             </div>
           )}

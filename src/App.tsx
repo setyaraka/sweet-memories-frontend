@@ -63,7 +63,6 @@ export default function App() {
     setActiveId(ordered[idx].id);
     setShowRandom(true);
   };
-
   return (
     <>
       <BirthdayIntro/>
@@ -100,7 +99,6 @@ export default function App() {
               cat={cat}
               onCat={setCat}
             />
-
             <Reader
               email={active}
               onPrev={onPrev}
