@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Email } from "./lib/types"; // for Email["category"] typing
+import type { Email } from "./lib/types";
 import { PASS_PHRASE } from "./lib/constants";
 import { fmt, greet } from "./lib/dates";
 import Timeline from "./components/Timeline";
@@ -211,23 +211,54 @@ export default function App() {
         </div>
 
         <ComposerModal open={openCompose} onClose={() => setOpenCompose(false)} onSubmit={addEmail} />
-
-        <Modal open={showRandom} onClose={() => setShowRandom(false)}>
+        <Modal 
+          open={showRandom} 
+          onClose={() => setShowRandom(false)}
+          labelledBy="modal-title"
+        >
           {active ? (
-            <div>
-              <div className="text-sm text-[#6B6157]">{new Date(active.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}</div>
-              <h2 className="mt-1 text-xl font-semibold [text-wrap:balance]">{active.title}</h2>
-              <div className="mt-2 whitespace-pre-wrap leading-7 text-[clamp(16px,3.8vw,18px)] whitespace-pre-wrap">{text}</div>
-              <div className="mt-4 flex justify-end gap-2">
-                <button className="h-11 rounded-xl border border-[#ecd9cf] bg-white px-4 hover:bg-[#fff6f2]" onClick={() => setShowRandom(false)}>
-                  Tutup
-                </button>
+          <div className="relative">
+            <button 
+              className="absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full hover:bg-orange-100 transition-colors text-gray-400 hover:text-gray-600"
+              onClick={() => setShowRandom(false)}
+              aria-label="Tutup"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="mb-4 pb-3 border-b border-orange-200/50">
+              <div className="text-sm text-orange-700/70 font-medium mb-1">
+                {new Date(active.created_at).toLocaleDateString("id-ID", { 
+                  day: "2-digit", 
+                  month: "long", 
+                  year: "numeric" 
+                })}
+              </div>
+              
+              <h2 
+                id="modal-title" 
+                className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight [text-wrap:balance] pr-6"
+              >
+                {active.title}
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div className="prose prose-gray prose-sm sm:prose-base max-w-none">
+                {(text || "").split('\n\n').map((paragraph, index) => (
+                  <p key={index} className="text-gray-700 leading-relaxed mb-3 last:mb-0">
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </div>
-          ) : (
-            <div>Tidak ada surat</div>
-          )}
-        </Modal>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Tidak ada surat</p>
+          </div>
+        )}
+      </Modal>
       </div>
     </>
   );
