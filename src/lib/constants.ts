@@ -5,3 +5,4 @@ export const STORAGE_KEYS = {
   
 // Isi kalau mau soft lock. Kosongkan ("") untuk menonaktifkan.
 export const PASS_PHRASE = "";
+export const FINAL_ID = "final-101";
