@@ -10,7 +10,7 @@ import BirthdayIntro from "./components/BirthdayInfo";
 import { AudioProvider } from "./audio/AudioProvider";
 import FloatingActions from "./components/FloatingActions";
 import RandomModal from "./components/RandomModal";
-import { FINAL_ID } from "./lib/constants"; // ⬅️ tambahkan ini
+import { FINAL_ID } from "./lib/constants";
 
 export default function App() {
   const [unlocked, setUnlocked] = useState<boolean>(!PASS_PHRASE);
@@ -21,7 +21,6 @@ export default function App() {
   const [showList, setShowList] = useState(false);
   const [openCompose, setOpenCompose] = useState(false);
   const [showRandom, setShowRandom] = useState(false);
-  const [activePos, setActivePos] = useState<number>(0);
 
   const { data: emails, create } = useRemoteEmails({ query, cat });
   const ordered = useMemo(() => emails, [emails]);
@@ -42,10 +41,8 @@ export default function App() {
     setOpenCompose(false);
   };
 
-  // Navigasi
   const onPrev = () => {
     if (isFinal) {
-      // dari Halaman Terakhir balik ke surat terakhir (jika ada)
       if (ordered.length) setActiveId(ordered[ordered.length - 1].id);
       return;
     }
@@ -54,17 +51,15 @@ export default function App() {
   };
 
   const onNext = () => {
-    if (isFinal) return; // di final tidak ada "berikutnya"
+    if (isFinal) return;
     if (activeIndex < 0) return;
     if (activeIndex >= ordered.length - 1) {
-      // dari surat terakhir menuju Halaman Terakhir
       setActiveId(FINAL_ID);
       return;
     }
     setActiveId(ordered[activeIndex + 1].id);
   };
 
-  // Surprise: pilih dari surat biasa saja (bukan final)
   const randomNote = () => {
     if (!ordered.length) return;
     const idx = Math.floor(Math.random() * ordered.length);
@@ -72,7 +67,6 @@ export default function App() {
     setShowRandom(true);
   };
 
-  // status ujung untuk tombol di Reader
   const atStart = !isFinal && activeIndex <= 0;
   const atEnd = isFinal ? true : (activeIndex < 0 || activeIndex >= ordered.length - 1);
   const showFinal = query.trim() === "" && cat.trim() === "";
@@ -187,7 +181,6 @@ export default function App() {
                         row.id === activeId ? "bg-[#fff6f2]" : "hover:bg-[#fff3ee]"
                       }`}
                       onClick={() => {
-                        setActivePos(pos);
                         setShowList(false);
                         setActiveId(row.id);
                       }}

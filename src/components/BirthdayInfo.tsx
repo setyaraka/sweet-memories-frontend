@@ -109,7 +109,7 @@ export default function BirthdayIntro() {
             {typed}
           </p>
 
-          <div className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="mt-5">
             <button
               className="inline-flex items-center justify-center gap-2 w-full rounded-xl px-4 py-3.5 font-medium text-white hover:shadow active:translate-y-[1px] transition"
               style={{ backgroundColor: "#A45D5D" }}
@@ -117,15 +117,6 @@ export default function BirthdayIntro() {
               aria-label="Buka Museum"
             >
               <span>Buka Museum</span>
-            </button>
-
-            <button
-              className="inline-flex items-center justify-center gap-2 w-full rounded-xl px-4 py-3.5 font-medium hover:shadow-sm transition"
-              style={{ border: "1px solid #A3B18A", color: "#2B2B2B", background: "transparent" }}
-              onClick={closeIntro}
-              aria-label="Tutup dengan Senyum"
-            >
-              <span>Tutup dengan Senyum</span>
             </button>
           </div>
         </div>

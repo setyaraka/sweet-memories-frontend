@@ -4,11 +4,11 @@ import { btn } from "../lib/ui";
 import { JSX } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, HeartHandshake, MessageCircleHeart, PartyPopper, Sunrise } from "lucide-react";
-import { FINAL_ID } from "../lib/constants";   // ⬅️ import
+import { FINAL_ID } from "../lib/constants";
 
 type Props = {
   email?: Email;
-  activeId?: string;          // ⬅️ terima activeId
+  activeId?: string;
   onPrev: () => void;
   onNext: () => void;
   atStart: boolean;
@@ -32,12 +32,10 @@ const categoryIcon: Record<string, JSX.Element> = {
 export default function Reader({ email, activeId, onPrev, onNext, atStart, atEnd }: Props) {
   const isFinal = activeId === FINAL_ID;
 
-  // Untuk surat normal
   const text = email?.content.replace(/\\n/g, "\n") ?? "";
   const catKey = (email as Email)?.category?.toLowerCase?.() ?? "random";
   const meta = categoryMeta[catKey] ?? categoryMeta.random;
 
-  // Styling khusus final
   const finalShell = [
     "rounded-2xl p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]",
     "bg-gradient-to-br from-[#FFF1F5] to-[#FFF7FA] ring-1 ring-rose-200/50"
