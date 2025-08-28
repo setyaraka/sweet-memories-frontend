@@ -15,7 +15,6 @@ export function useRemoteEmails(filters: { query?: string; cat?: string }) {
       if (filters.query) q.set("query", filters.query);
       if (filters.cat) q.set("cat", filters.cat);
       const items = await api<Email[]>(`/emails${q.toString() ? `?${q.toString()}` : ""}`);
-      console.log(items, '>>> ITEMS')
       setData(items);
     } catch (e: any) {
       setError(e.message || String(e));

@@ -1,7 +1,8 @@
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
+const ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY!;
 
-function getApiKey() {
-  return localStorage.getItem("mc_api_key") || process.env.REACT_APP_API_KEY || "";
+function getAuthHeader() {
+  return `Bearer ${ANON_KEY}`;
 }
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
@@ -11,7 +12,8 @@ export async function api<T>(path: string, method: Method = "GET", body?: any): 
     method,
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": getApiKey(),
+      "Authorization": getAuthHeader(),
+      // "x-api-key": getApiKey(),
     },
     body: body ? JSON.stringify(body) : undefined,
   });
